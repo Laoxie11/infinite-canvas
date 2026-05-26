@@ -264,7 +264,7 @@ export default function AdminAssetsPage() {
                 okButtonProps={{ danger: true }}
                 cancelText="取消"
             >
-                确定删除「{deletingAsset?.title}」吗？删除后会从服务器素材库中移除。
+                确定删除「{deletingAsset?.title}」吗？删除后会从团队素材库中移除。
             </Modal>
         </main>
     );

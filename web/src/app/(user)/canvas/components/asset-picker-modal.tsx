@@ -34,8 +34,8 @@ export function AssetPickerModal({ open, defaultTab = "my-assets", onInsert, onC
                 activeKey={activeTab}
                 onChange={(key) => setActiveTab(key as AssetPickerTab)}
                 items={[
-                    { key: "my-assets", label: "我的素材", children: <MyAssetsTab onInsert={onInsert} /> },
-                    { key: "library", label: "素材库", children: <LibraryTab onInsert={onInsert} /> },
+                    { key: "my-assets", label: "项目素材", children: <MyAssetsTab onInsert={onInsert} /> },
+                    { key: "library", label: "团队素材库", children: <LibraryTab onInsert={onInsert} /> },
                 ]}
             />
         </Modal>

@@ -32,7 +32,7 @@ export default function AssetLibraryPage() {
 
     useEffect(() => {
         if (query.isError) {
-            message.error(query.error instanceof Error ? query.error.message : "获取素材库失败");
+            message.error(query.error instanceof Error ? query.error.message : "获取团队素材库失败");
         }
     }, [message, query.error, query.isError]);
 
@@ -72,7 +72,7 @@ export default function AssetLibraryPage() {
                     metadata: { source: "asset-library", assetId: asset.id },
                 });
             }
-            message.success("已加入我的素材");
+            message.success("已加入项目素材");
         } catch {
             message.error("加入失败");
         }
@@ -91,8 +91,8 @@ export default function AssetLibraryPage() {
             <main className="min-h-0 flex-1 overflow-y-auto bg-background bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] px-6 py-8 [background-size:16px_16px] dark:bg-[radial-gradient(rgba(245,245,244,.16)_1px,transparent_1px)]">
                 <div className="pb-8">
                     <div className="mx-auto max-w-5xl text-center">
-                        <h1 className="text-4xl font-semibold tracking-tight text-stone-950 dark:text-stone-100">素材库</h1>
-                        <p className="mt-3 text-sm text-stone-500 dark:text-stone-400">挑选团队素材，加入我的素材后继续编辑和使用。</p>
+                        <h1 className="text-4xl font-semibold tracking-tight text-stone-950 dark:text-stone-100">团队素材库</h1>
+                        <p className="mt-3 text-sm text-stone-500 dark:text-stone-400">挑选团队素材，加入项目素材后继续编辑和使用。</p>
                     </div>
                     <div className="mx-auto mt-8 w-full max-w-2xl">
                         <Input
@@ -214,7 +214,7 @@ export default function AssetLibraryPage() {
                                 </Button>
                             ) : null}
                             <Button icon={<FolderPlus className="size-4" />} onClick={() => void saveToMyAssets(selectedAsset)}>
-                                加入我的素材
+                                加入项目素材
                             </Button>
                         </div>
                     </div>
@@ -265,7 +265,7 @@ function LibraryCard({ asset, onOpen, onAdd }: { asset: AssetLibraryItem; onOpen
                     查看
                 </Button>
                 <Button size="small" icon={<FolderPlus className="size-3.5" />} onClick={onAdd}>
-                    加入我的素材
+                    加入项目素材
                 </Button>
             </div>
         </Card>

@@ -15,7 +15,7 @@ const adminMenus = [
     { key: "/admin/users", icon: <UserOutlined />, label: "用户管理" },
     { key: "/admin/credit-logs", icon: <TransactionOutlined />, label: "算力点日志" },
     { key: "/admin/prompts", icon: <FileTextOutlined />, label: "提示词管理" },
-    { key: "/admin/assets", icon: <PictureOutlined />, label: "素材库" },
+    { key: "/admin/assets", icon: <PictureOutlined />, label: "团队素材" },
     { key: "/admin/settings", icon: <SettingOutlined />, label: "系统设置" },
 ];
 
@@ -38,7 +38,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
               : pathname.startsWith("/admin/users")
                 ? "/admin/users"
                 : "";
-    const pageTitle = pathname.startsWith("/admin/settings") ? "系统设置" : pathname.startsWith("/admin/assets") ? "素材库管理" : pathname.startsWith("/admin/prompts") ? "提示词管理" : pathname.startsWith("/admin/credit-logs") ? "算力点日志" : "用户管理";
+    const pageTitle = pathname.startsWith("/admin/settings") ? "系统设置" : pathname.startsWith("/admin/assets") ? "团队素材管理" : pathname.startsWith("/admin/prompts") ? "提示词管理" : pathname.startsWith("/admin/credit-logs") ? "算力点日志" : "用户管理";
 
     useEffect(() => {
         if (!isReady) return;
@@ -65,7 +65,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 <Flex align="center" gap={12} style={{ height: adminLayoutStyle.brandHeight, padding: "0 20px", borderBottom: `1px solid ${antToken.colorBorderSecondary}` }}>
                     <span aria-hidden style={{ display: "inline-block", width: 30, height: 30, background: antToken.colorText, WebkitMask: "url(/logo.svg) center / contain no-repeat", mask: "url(/logo.svg) center / contain no-repeat" }} />
                     <Typography.Text strong style={{ fontSize: 18, letterSpacing: 0 }}>
-                        无限画布
+                        创新创业AI平台
                     </Typography.Text>
                 </Flex>
                 <Menu
@@ -84,7 +84,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 />
                 <Flex vertical gap={8} style={{ position: "absolute", bottom: 0, insetInline: 0, padding: 12, borderTop: `1px solid ${antToken.colorBorder}`, background: antToken.colorBgContainer }}>
                     <Button block icon={<HomeOutlined />} href="/canvas" target="_blank" rel="noreferrer">
-                        前往画布
+                        前往项目画布
                     </Button>
                     <Button block icon={<LogoutOutlined />} onClick={logout}>
                         退出登录
