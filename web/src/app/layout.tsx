@@ -7,8 +7,8 @@ import "./globals.css";
 import React from "react";
 
 export const metadata: Metadata = {
-    title: "无限画布",
-    description: "一个无限画布创作工具",
+    title: "创新创业AI平台",
+    description: "创新创业中心 AI 创作与项目推演平台",
 };
 
 export default function RootLayout({

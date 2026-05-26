@@ -43,7 +43,7 @@ export function AppTopNav() {
                                         WebkitMask: "url(/logo.svg) center / contain no-repeat",
                                     }}
                                 />
-                                <span className="text-base font-medium">无限画布</span>
+                                <span className="text-base font-medium">创新创业AI平台</span>
                             </Link>
 
                             <button
