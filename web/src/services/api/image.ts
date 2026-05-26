@@ -67,7 +67,7 @@ function resolveRequestSize(quality: string | undefined, size: string) {
     const value = size.trim();
     if (!value || value === "auto") return undefined;
     if (/^\d+x\d+$/.test(value)) return value;
-    return (quality && resolveSize(quality, value)) || value;
+    return resolveSize(quality || "low", value);
 }
 
 function resolveImageDataUrl(item: Record<string, unknown>) {
