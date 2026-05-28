@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 
 export const runtime = "nodejs";
-export const maxDuration = 300;
+export const maxDuration = 900;
 
 type RouteContext = {
     params: Promise<{ path: string[] }>;
