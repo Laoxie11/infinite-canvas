@@ -135,6 +135,10 @@ def run_provider(name: str, args: argparse.Namespace) -> dict:
         "ok": 200 <= status < 300,
         "raw": raw_path,
     }
+    if isinstance(response, dict) and response.get("error"):
+        result["ok"] = False
+        result["error"] = error_message(response)
+        return result
     if result["ok"]:
         try:
             result["image"] = save_image(name, response, args.output_dir, args.timeout)

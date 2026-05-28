@@ -84,6 +84,9 @@ function parseImagePayload(payload: ImageApiResponse) {
     if (typeof payload.code === "number" && payload.code !== 0) {
         throw new Error(payload.msg || "请求失败");
     }
+    if (payload.error?.message) {
+        throw new Error(payload.error.message);
+    }
     const images =
         payload.data
             ?.map(resolveImageDataUrl)
@@ -95,6 +98,11 @@ function parseImagePayload(payload: ImageApiResponse) {
     }
 
     return images;
+}
+
+function shouldRetryImageError(error: unknown) {
+    const message = error instanceof Error ? error.message : "";
+    return message.includes("upstream did not return any image output") || message.includes("接口没有返回图片");
 }
 
 function readAxiosError(error: unknown, fallback: string) {
@@ -154,27 +162,31 @@ export async function requestGeneration(config: AiConfig, prompt: string) {
     const n = Math.max(1, Math.min(15, Math.floor(Math.abs(Number(config.count)) || 1)));
     const quality = normalizeQuality(config.quality);
     const requestSize = resolveRequestSize(quality, config.size);
-    try {
-        const response = await axios.post<ImageApiResponse>(
-            aiApiUrl(config, "/images/generations"),
-            {
-                model: config.model,
-                prompt: withSystemPrompt(config, prompt),
-                n,
-                ...(quality ? { quality } : {}),
-                ...(requestSize ? { size: requestSize } : {}),
-                response_format: "b64_json",
-            },
-            {
-                headers: aiHeaders(config, "application/json"),
-            },
-        );
-        const images = parseImagePayload(response.data);
-        refreshRemoteUser(config);
-        return images;
-    } catch (error) {
-        throw new Error(readAxiosError(error, "请求失败"));
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+        try {
+            const response = await axios.post<ImageApiResponse>(
+                aiApiUrl(config, "/images/generations"),
+                {
+                    model: config.model,
+                    prompt: withSystemPrompt(config, prompt),
+                    n,
+                    ...(quality ? { quality } : {}),
+                    ...(requestSize ? { size: requestSize } : {}),
+                    response_format: "b64_json",
+                },
+                {
+                    headers: aiHeaders(config, "application/json"),
+                },
+            );
+            const images = parseImagePayload(response.data);
+            refreshRemoteUser(config);
+            return images;
+        } catch (error) {
+            if (attempt === 0 && shouldRetryImageError(error)) continue;
+            throw new Error(readAxiosError(error, "请求失败"));
+        }
     }
+    throw new Error("请求失败");
 }
 
 export async function requestEdit(config: AiConfig, prompt: string, references: ReferenceImage[]) {
@@ -195,14 +207,18 @@ export async function requestEdit(config: AiConfig, prompt: string, references: 
     const files = await Promise.all(references.map(async (image) => dataUrlToFile({ ...image, dataUrl: await imageToDataUrl(image) })));
     files.forEach((file) => formData.append("image", file));
 
-    try {
-        const response = await axios.post<ImageApiResponse>(aiApiUrl(config, "/images/edits"), formData, { headers: aiHeaders(config) });
-        const images = parseImagePayload(response.data);
-        refreshRemoteUser(config);
-        return images;
-    } catch (error) {
-        throw new Error(readAxiosError(error, "请求失败"));
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+        try {
+            const response = await axios.post<ImageApiResponse>(aiApiUrl(config, "/images/edits"), formData, { headers: aiHeaders(config) });
+            const images = parseImagePayload(response.data);
+            refreshRemoteUser(config);
+            return images;
+        } catch (error) {
+            if (attempt === 0 && shouldRetryImageError(error)) continue;
+            throw new Error(readAxiosError(error, "请求失败"));
+        }
     }
+    throw new Error("请求失败");
 }
 
 export async function requestImageQuestion(config: AiConfig, messages: ChatCompletionMessage[], onDelta: (text: string) => void) {

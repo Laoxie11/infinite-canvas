@@ -1,5 +1,6 @@
 # 待测试
 
+- 图片接口即使返回 HTTP 200，只要响应体包含 `error.message` 也会显示真实错误；对 foxcode 偶发的 `upstream did not return any image output` 会自动重试一次。
 - 新增 `scripts/compare_image_providers.py`，可用同一组生图参数对比 foxcode 与 PackyAPI 的响应状态、耗时和返回图片。
 - AI 上游返回错误时，后端会把 foxcode/OpenAI 兼容接口返回的具体错误消息透传给前端，不再统一显示“AI 接口请求失败”。
 - 修复图片生成质量为自动且尺寸为比例值时，会把 `1:1` 直接传给上游导致 foxcode 返回尺寸错误的问题；现在比例会先转换为像素尺寸再请求。
