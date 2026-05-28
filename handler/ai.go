@@ -122,7 +122,7 @@ func copyAIResponse(w http.ResponseWriter, request *http.Request, onFailure func
 		if onFailure != nil {
 			onFailure()
 		}
-		Fail(w, "AI 接口请求失败")
+		Fail(w, readAIUpstreamError(payload, response.StatusCode))
 		return
 	}
 
@@ -136,6 +136,27 @@ func copyAIResponse(w http.ResponseWriter, request *http.Request, onFailure func
 	}
 	w.WriteHeader(response.StatusCode)
 	_, _ = io.Copy(w, response.Body)
+}
+
+func readAIUpstreamError(body []byte, statusCode int) string {
+	var payload struct {
+		Error *struct {
+			Message string `json:"message"`
+		} `json:"error"`
+		Msg string `json:"msg"`
+	}
+	if len(body) > 0 && json.Unmarshal(body, &payload) == nil {
+		if payload.Error != nil && strings.TrimSpace(payload.Error.Message) != "" {
+			return payload.Error.Message
+		}
+		if strings.TrimSpace(payload.Msg) != "" {
+			return payload.Msg
+		}
+	}
+	if statusCode > 0 {
+		return fmt.Sprintf("AI 接口请求失败（%d）", statusCode)
+	}
+	return "AI 接口请求失败"
 }
 
 func readAIRequest(r *http.Request) ([]byte, string, string, error) {
