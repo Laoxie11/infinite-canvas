@@ -149,9 +149,14 @@ export default function ImagePage() {
         const batchStartedAt = performance.now();
         setStartedAt(batchStartedAt);
 
-        const tasks = Array.from({ length: generationCount }, (_, index) => runGenerationSlot(index, snapshot));
-
-        const result = await Promise.allSettled(tasks);
+        const result: PromiseSettledResult<GeneratedImage>[] = [];
+        for (let index = 0; index < generationCount; index += 1) {
+            try {
+                result.push({ status: "fulfilled", value: await runGenerationSlot(index, snapshot) });
+            } catch (error) {
+                result.push({ status: "rejected", reason: error });
+            }
+        }
         const successImages = result.filter((item): item is PromiseFulfilledResult<GeneratedImage> => item.status === "fulfilled").map((item) => item.value);
         const successCount = successImages.length;
         const failCount = generationCount - successCount;
@@ -411,7 +416,7 @@ export default function ImagePage() {
                                     ) : result.status === "failed" ? (
                                         <FailedImageCard key={result.id} error={result.error || "生成失败"} onRetry={() => retryResult(index)} />
                                     ) : (
-                                        <PendingImageCard key={result.id} />
+                                        <PendingImageCard key={result.id} elapsedMs={elapsedMs} />
                                     ),
                                 )}
                             </div>
@@ -516,7 +521,7 @@ function ResultImageCard({
     );
 }
 
-function PendingImageCard() {
+function PendingImageCard({ elapsedMs }: { elapsedMs: number }) {
     return (
         <div className="relative aspect-square overflow-hidden rounded-lg border border-dashed border-stone-300 bg-stone-50 dark:border-stone-700 dark:bg-stone-900">
             <div
@@ -528,7 +533,8 @@ function PendingImageCard() {
             />
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-sm text-stone-500 dark:text-stone-400">
                 <LoaderCircle className="size-6 animate-spin" />
-                <span>生成中</span>
+                <span>正在生成图片</span>
+                <span className="text-xs opacity-75">已等待 {formatDuration(elapsedMs)}，慢速渠道可能需要 1-4 分钟</span>
             </div>
         </div>
     );
@@ -539,7 +545,7 @@ function FailedImageCard({ error, onRetry }: { error: string; onRetry: () => voi
         <div className="overflow-hidden rounded-lg border border-red-200 bg-red-50 dark:border-red-950 dark:bg-red-950/20">
             <div className="flex aspect-square flex-col items-center justify-center gap-3 p-5 text-center">
                 <div className="text-sm font-medium text-red-600 dark:text-red-300">生成失败</div>
-                <Typography.Paragraph ellipsis={{ rows: 4 }} className="!mb-0 !text-xs !text-red-500 dark:!text-red-300">
+                <Typography.Paragraph copyable ellipsis={{ rows: 6, expandable: true, symbol: "展开" }} className="!mb-0 !max-w-full !text-xs !text-red-500 dark:!text-red-300">
                     {error}
                 </Typography.Paragraph>
             </div>

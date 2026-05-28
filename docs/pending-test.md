@@ -1,5 +1,6 @@
 # 待测试
 
+- AI 生图页改为逐张生成，降低慢速供应商并发压力；等待卡片会显示已等待时间和慢速渠道提示，失败卡支持展开/复制详细错误。
 - 图片接口即使返回 HTTP 200，只要响应体包含 `error.message` 也会显示真实错误；对 foxcode 偶发的 `upstream did not return any image output` 会自动重试一次。
 - 新增 `scripts/compare_image_providers.py`，可用同一组生图参数对比 foxcode 与 PackyAPI 的响应状态、耗时和返回图片。
 - AI 上游返回错误时，后端会把 foxcode/OpenAI 兼容接口返回的具体错误消息透传给前端，不再统一显示“AI 接口请求失败”。
