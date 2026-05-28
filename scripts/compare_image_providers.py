@@ -48,22 +48,52 @@ def download_url(url: str, output: Path, timeout: int) -> None:
         output.write_bytes(response.read())
 
 
+def save_raw_response(provider: str, text: str, output_dir: Path) -> str:
+    output = output_dir / f"{provider}.raw.json"
+    output.write_text(text, encoding="utf-8")
+    return str(output)
+
+
+def find_image_value(value):
+    if isinstance(value, dict):
+        for key in ("b64_json", "url", "image_url", "image", "output_url"):
+            item = value.get(key)
+            if isinstance(item, str) and item:
+                return key, item
+            if isinstance(item, dict):
+                nested = item.get("url")
+                if isinstance(nested, str) and nested:
+                    return f"{key}.url", nested
+        for item in value.values():
+            found = find_image_value(item)
+            if found:
+                return found
+    if isinstance(value, list):
+        for item in value:
+            found = find_image_value(item)
+            if found:
+                return found
+    return None
+
+
 def save_image(provider: str, payload: dict, output_dir: Path, timeout: int) -> str:
-    data = payload.get("data")
-    if not isinstance(data, list) or not data:
-        return "no data[0]"
-    item = data[0]
-    if not isinstance(item, dict):
-        return "data[0] is not object"
-    if isinstance(item.get("b64_json"), str):
+    found = find_image_value(payload)
+    if not found:
+        return "no image field found"
+    key, value = found
+    if key.endswith("b64_json"):
         output = output_dir / f"{provider}.png"
-        output.write_bytes(base64.b64decode(item["b64_json"]))
-        return str(output)
-    if isinstance(item.get("url"), str):
+        output.write_bytes(base64.b64decode(value))
+        return f"{output} ({key})"
+    if value.startswith("data:image/") and "," in value:
         output = output_dir / f"{provider}.png"
-        download_url(item["url"], output, timeout)
-        return f"{output} ({item['url']})"
-    return "no b64_json/url"
+        output.write_bytes(base64.b64decode(value.split(",", 1)[1]))
+        return f"{output} ({key})"
+    if value.startswith("http://") or value.startswith("https://"):
+        output = output_dir / f"{provider}.png"
+        download_url(value, output, timeout)
+        return f"{output} ({key}: {value})"
+    return f"unsupported image field {key}"
 
 
 def error_message(payload: dict | str) -> str:
@@ -92,6 +122,7 @@ def run_provider(name: str, args: argparse.Namespace) -> dict:
         **provider["extra"],
     }
     status, text, elapsed = post_json(provider["url"], api_key, payload, args.timeout)
+    raw_path = save_raw_response(name, text, args.output_dir)
     try:
         response = json.loads(text)
     except json.JSONDecodeError:
@@ -102,6 +133,7 @@ def run_provider(name: str, args: argparse.Namespace) -> dict:
         "status": status,
         "seconds": round(elapsed, 2),
         "ok": 200 <= status < 300,
+        "raw": raw_path,
     }
     if result["ok"]:
         try:
