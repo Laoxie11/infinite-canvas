@@ -172,7 +172,6 @@ export async function requestGeneration(config: AiConfig, prompt: string) {
                     n,
                     ...(quality ? { quality } : {}),
                     ...(requestSize ? { size: requestSize } : {}),
-                    response_format: "b64_json",
                 },
                 {
                     headers: aiHeaders(config, "application/json"),
@@ -197,7 +196,6 @@ export async function requestEdit(config: AiConfig, prompt: string, references: 
     formData.set("model", config.model);
     formData.set("prompt", withSystemPrompt(config, prompt));
     formData.set("n", String(n));
-    formData.set("response_format", "b64_json");
     if (quality) {
         formData.set("quality", quality);
     }

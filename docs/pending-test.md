@@ -1,5 +1,6 @@
 # 待测试
 
+- 图片生成/编辑请求不再发送 Packy `image` 分组不支持的 `response_format` 参数，返回 URL 或 base64 图片时仍会正常解析展示。
 - AI 生图/改图代理等待时长从 5 分钟提高到 15 分钟，避免慢速供应商在后端仍在等待时被 Next.js 代理提前超时。
 - AI 生图页改为逐张生成，降低慢速供应商并发压力；等待卡片会显示已等待时间和慢速渠道提示，失败卡支持展开/复制详细错误。
 - 图片接口即使返回 HTTP 200，只要响应体包含 `error.message` 也会显示真实错误；对 foxcode 偶发的 `upstream did not return any image output` 会自动重试一次。

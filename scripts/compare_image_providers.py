@@ -18,7 +18,7 @@ PROVIDERS = {
     "packy": {
         "url": "https://www.packyapi.com/v1/images/generations",
         "key_env": "PACKY_API_KEY",
-        "extra": {"output_format": "png", "response_format": "url"},
+        "extra": {"output_format": "png"},
     },
 }
 
